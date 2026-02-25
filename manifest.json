@@ -3,9 +3,15 @@
   "name": "GitHub Secrets Scanner",
   "version": "1.0",
   "description": "Scans GitHub repositories for exposed .env files and keys.",
+  "icons": {
+    "128": "image.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Scan Repository"
+    "default_title": "Scan Repository",
+    "default_icon": {
+      "128": "image.png"
+    }
   },
   "permissions": [
     "activeTab",
