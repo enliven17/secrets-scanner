@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchRepoBtn = document.getElementById('search-repo-btn');
   const searchGlobalBtn = document.getElementById('search-global-btn');
   const resultsDiv = document.getElementById('results');
+  const scanOldCommitsCheckbox = document.getElementById('scan-old-commits');
 
   const settingsSection = document.getElementById('settings-section');
   const mainSection = document.getElementById('main-section');
@@ -123,11 +124,46 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsDiv.innerHTML = html;
   }
 
+  async function fetchRepoCommits(repo) {
+    let headers = { 'Accept': 'application/vnd.github.v3+json' };
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(['githubToken'], async function (result) {
+        if (!result.githubToken) {
+          return reject(new Error('GitHub PAT is required to scan old commits.'));
+        }
+        headers['Authorization'] = `token ${result.githubToken}`;
+        try {
+          let req = await fetch(`https://api.github.com/repos/${repo}/commits?per_page=100`, { headers });
+          if (!req.ok) throw new Error((await req.json()).message || 'Failed to fetch commits');
+          resolve(await req.json());
+        } catch (e) { reject(e); }
+      });
+    });
+  }
+
+  async function fetchCommitDetails(repo, sha) {
+    let headers = { 'Accept': 'application/vnd.github.v3+json' };
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(['githubToken'], async function (result) {
+        if (result.githubToken) headers['Authorization'] = `token ${result.githubToken}`;
+        try {
+          let req = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}`, { headers });
+          if (!req.ok) resolve(null); // Ignore single failures
+          else resolve(await req.json());
+        } catch (e) { resolve(null); }
+      });
+    });
+  }
+
   scanRepoBtn.addEventListener('click', async () => {
     let repo = getRepoFromUrl(targetUrlInput.value);
     if (!repo) {
       renderError("Please enter a valid GitHub repository URL.");
       return;
+    }
+
+    if (scanOldCommitsCheckbox && scanOldCommitsCheckbox.checked) {
+      return scanOldCommitsLogic(repo);
     }
 
     // Predefined queries to look for secrets
@@ -229,6 +265,76 @@ document.addEventListener('DOMContentLoaded', () => {
       renderError("Error: " + e.message + ". Try adding a PAT in Settings if rate limited.");
     }
   });
+
+  async function scanOldCommitsLogic(repo) {
+    showProgress('Fetching recent 100 commits...');
+    try {
+      let commits = await fetchRepoCommits(repo);
+      if (!commits || commits.length === 0) {
+        displayResults([], 0, "past commits");
+        return;
+      }
+
+      let suspiciousFiles = ['.env', 'id_rsa', 'id_ed25519', 'credentials', 'wp-config.php', 'database.yml', 'wallet.dat', 'keystore'];
+      let secretRegexes = [
+        /AKIA[0-9A-Z]{16}/,
+        /BEGIN (RSA )?PRIVATE KEY/,
+        /sk_live_[0-9a-zA-Z]{24,}/,
+        /ghp_[0-9a-zA-Z]{36}/,
+        /xox[bp]-[0-9a-zA-Z\-]+/,
+        /mongodb\+srv:\/\//,
+        /postgres:\/\/[^:]+:[^@]+@/,
+        /PRIVATE_KEY\s*=\s*['"]?[a-zA-Z0-9]{32,}['"]?/,
+        /SECRET_KEY\s*=\s*['"]?[a-zA-Z0-9]{32,}['"]?/,
+        /xprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
+        /yprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
+        /zprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
+        /("[a-z]+(\s+[a-z]+){11}")/, // 12-word basic regex
+        /("[a-z]+(\s+[a-z]+){23}")/  // 24-word basic regex
+      ];
+
+      let foundItems = [];
+
+      for (let i = 0; i < commits.length; i++) {
+        showProgress(`Scanning commit history... (${i + 1}/${commits.length})`);
+        let detail = await fetchCommitDetails(repo, commits[i].sha);
+        if (detail && detail.files) {
+          for (let file of detail.files) {
+            let filename = file.filename.split('/').pop().toLowerCase();
+            let isSuspicious = suspiciousFiles.includes(filename);
+            let hasTokens = false;
+
+            if (file.patch) {
+              for (let rx of secretRegexes) {
+                if (rx.test(file.patch)) {
+                  hasTokens = true;
+                  break;
+                }
+              }
+            }
+
+            if (isSuspicious || hasTokens) {
+              foundItems.push({
+                name: file.filename + ` (Commit: ${detail.sha.substring(0, 7)})`,
+                html_url: detail.html_url,
+                repository: { full_name: repo, html_url: `https://github.com/${repo}` },
+                sha: `${detail.sha}-${file.filename}` // Unique dedup key
+              });
+            }
+          }
+        }
+        // Minimal delay to prevent API secondary rate limits on looping details
+        await new Promise(r => setTimeout(r, 200));
+      }
+
+      // Deduplicate items
+      let uniqueItems = Array.from(new Map(foundItems.map(item => [item.sha, item])).values());
+      displayResults(uniqueItems, uniqueItems.length, "past commits");
+
+    } catch (e) {
+      renderError("Old Commits Error: " + e.message);
+    }
+  }
 
   searchRepoBtn.addEventListener('click', async () => {
     let repo = getRepoFromUrl(targetUrlInput.value);

@@ -231,6 +231,12 @@
       <input type="text" id="target-url" placeholder="github.com/owner/repo" autocomplete="off" spellcheck="false">
     </div>
 
+    <div class="group" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+      <label for="scan-old-commits" style="margin: 0; cursor: pointer; color: var(--text-main);">Scan Old Commits (Last
+        100)</label>
+      <input type="checkbox" id="scan-old-commits" style="margin: 0; cursor: pointer; width: 16px; height: 16px;">
+    </div>
+
     <button id="scan-repo-btn" class="btn-primary">Scan Common Secrets</button>
 
     <div class="divider"></div>
