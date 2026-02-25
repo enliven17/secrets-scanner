@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub Secrets Scanner",
+  "version": "1.0",
+  "description": "Scans GitHub repositories for exposed .env files and keys.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Scan Repository"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://github.com/*"
+  ]
+}

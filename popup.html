@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GitHub Repo Scanner</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 350px; padding: 15px; background: #0d1117; color: #c9d1d9; }
+    h2 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
+    label { font-size: 13px; font-weight: 600; display: block; margin-top: 10px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #30363d; border-radius: 6px; background: #010409; color: #c9d1d9; box-sizing: border-box;
+    }
+    button {
+      background-color: #238636; color: #ffffff; border: 1px solid rgba(240, 246, 252, 0.1); padding: 5px 16px;
+      font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; display: inline-block; width: 100%; margin-bottom: 10px; height: 32px;
+    }
+    button:hover { background-color: #2ea043; }
+    .btn-secondary { background-color: #21262d; border-color: rgba(240,246,252,0.1); }
+    .btn-secondary:hover { background-color: #30363d; }
+    .hidden { display: none; }
+    #results { margin-top: 15px; max-height: 200px; overflow-y: auto; font-size: 13px; background: #010409; padding: 10px; border-radius: 6px; border: 1px solid #30363d; }
+    .result-item { padding: 8px 0; border-bottom: 1px solid #30363d; }
+    .result-item:last-child { border-bottom: none; }
+    .result-item a { color: #58a6ff; text-decoration: none; word-break: break-all; }
+    .result-item a:hover { text-decoration: underline; }
+    .error { color: #f85149; }
+    .success { color: #3fb950; }
+  </style>
+</head>
+<body>
+  <h2>GitHub Secrets Scanner</h2>
+  
+  <div id="settings-section" class="hidden">
+    <label>GitHub Personal Access Token:</label>
+    <div style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">Required for global code search or increased limits.</div>
+    <input type="password" id="github-token" placeholder="ghp_...">
+    <button id="save-token" class="btn-secondary">Save Token</button>
+    <button id="close-settings" class="btn-secondary">Close Settings</button>
+  </div>
+
+  <div id="main-section">
+    <label>Repository URL:</label>
+    <input type="text" id="target-url" placeholder="https://github.com/owner/repo">
+    
+    <button id="scan-repo-btn">Scan Common Secrets in Repo</button>
+    
+    <label>Search Keyword / Pattern:</label>
+    <input type="text" id="search-keyword" placeholder='e.g. AWS_ACCESS_KEY_ID or filename:.env'>
+    <button id="search-repo-btn" class="btn-secondary">Search Keyword in Repo</button>
+    <button id="search-global-btn" class="btn-secondary">Search Keyword Across All Repos</button>
+
+    <div style="text-align: right; margin-top: 10px;">
+      <a href="#" id="open-settings" style="color:#8b949e; font-size: 12px; text-decoration: none;">⚙️ Token Settings</a>
+    </div>
+  </div>
+
+  <div id="results" class="hidden"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
