@@ -132,11 +132,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Predefined queries to look for secrets
     let queries = [
+      // Environment & System Configs
       `filename:.env repo:${repo}`,
       `filename:id_rsa repo:${repo}`,
+      `filename:id_ed25519 repo:${repo}`,
       `filename:credentials repo:${repo}`,
-      `"AKIA" repo:${repo}`,
-      `"BEGIN PRIVATE KEY" repo:${repo}`
+      `filename:wp-config.php repo:${repo}`,
+      `filename:database.yml repo:${repo}`,
+      `"mongodb+srv://" repo:${repo}`,     // MongoDB URLs
+      `"postgres://" repo:${repo}`,        // PostgreSQL URLs
+      `"DATABASE_URL=" repo:${repo}`,      // General DB URL
+      `"DB_PASSWORD=" repo:${repo}`,
+
+      // Cloud & SaaS APIs
+      `"AKIA" repo:${repo}`,               // AWS Access Key ID
+      `"sk_live_" repo:${repo}`,           // Stripe Live Secret Key
+      `"ghp_" repo:${repo}`,               // GitHub Personal Access Token
+      `"xoxb-" repo:${repo}`,              // Slack Bot Token
+      `"xoxp-" repo:${repo}`,              // Slack User Token
+      `"NPM_TOKEN=" repo:${repo}`,
+      `"DISCORD_BOT_TOKEN=" repo:${repo}`,
+      `"TELEGRAM_BOT_TOKEN=" repo:${repo}`,
+      `"SENDGRID_API_KEY=" repo:${repo}`,
+
+      // Private Key Identifiers
+      `"BEGIN PRIVATE KEY" repo:${repo}`,
+      `"BEGIN RSA PRIVATE KEY" repo:${repo}`,
+      `"PRIVATE_KEY=" repo:${repo}`,
+      `"SECRET_KEY=" repo:${repo}`,
+
+      // Crypto/Web3 Specific (Files)
+      `filename:wallet.dat repo:${repo}`,  // Bitcoin Core Wallet
+      `filename:keystore repo:${repo}`,    // Ethereum Keystore
+
+      // Crypto/Web3 Specific (Mnemonics & Keys)
+      `"mnemonic" repo:${repo}`,
+      `"seed phrase" repo:${repo}`,
+      `"bip39" repo:${repo}`,
+      `"12 words" repo:${repo}`,
+      `"24 words" repo:${repo}`,
+      `"xprv" repo:${repo}`,               // Extended Private Key
+      `"yprv" repo:${repo}`,               // BIP49 Extended Private Key
+      `"zprv" repo:${repo}`,               // BIP84 Extended Private Key
+      `"WIF" repo:${repo}`,                // Wallet Import Format (Bitcoin)
+      `"ETH_PRIVATE_KEY=" repo:${repo}`,
+      `"SOLANA_PRIVATE_KEY=" repo:${repo}`,
+      `"wallet_private_key" repo:${repo}`,
+      `"keystore_password" repo:${repo}`,
+      `"PASSPHRASE=" repo:${repo}`,
+
+      // Web3 Providers & Infrastructure
+      `"ALCHEMY_API_KEY=" repo:${repo}`,
+      `"INFURA_API_KEY=" repo:${repo}`,
+      `"MORALIS_API_KEY=" repo:${repo}`,
+      `"ETHERSCAN_API_KEY=" repo:${repo}`,
+      `"BSCSCAN_API_KEY=" repo:${repo}`
     ];
 
     showProgress('Scanning multiple patterns (this might take a few seconds)...');
