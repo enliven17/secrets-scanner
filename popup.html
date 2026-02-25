@@ -1,56 +1,306 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
-  <title>GitHub Repo Scanner</title>
+  <title>GitHub Secrets Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 350px; padding: 15px; background: #0d1117; color: #c9d1d9; }
-    h2 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
-    label { font-size: 13px; font-weight: 600; display: block; margin-top: 10px; }
-    input[type="text"], input[type="password"] {
-      width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #30363d; border-radius: 6px; background: #010409; color: #c9d1d9; box-sizing: border-box;
+    :root {
+      --bg-color: #0f172a;
+      /* Deep slate/charcoal */
+      --panel-bg: #1e293b;
+      /* Slightly lighter slate for panels */
+      --border-color: #334155;
+      /* Subtle divider */
+      --text-main: #f8fafc;
+      /* Crisp white */
+      --text-muted: #94a3b8;
+      /* Soft slate text */
+      --primary: #6366f1;
+      /* Vibrant indigo */
+      --primary-hover: #4f46e5;
+      --danger: #ef4444;
+      /* Soft vibrant red */
+      --danger-hover: #dc2828;
+      --success: #10b981;
+      /* Soft vibrant green */
+      --radius: 8px;
     }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      width: 360px;
+      margin: 0;
+      padding: 24px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      box-sizing: border-box;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    h2 svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      outline: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    input::placeholder {
+      color: #64748b;
+    }
+
     button {
-      background-color: #238636; color: #ffffff; border: 1px solid rgba(240, 246, 252, 0.1); padding: 5px 16px;
-      font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; display: inline-block; width: 100%; margin-bottom: 10px; height: 32px;
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    button:hover { background-color: #2ea043; }
-    .btn-secondary { background-color: #21262d; border-color: rgba(240,246,252,0.1); }
-    .btn-secondary:hover { background-color: #30363d; }
-    .hidden { display: none; }
-    #results { margin-top: 15px; max-height: 200px; overflow-y: auto; font-size: 13px; background: #010409; padding: 10px; border-radius: 6px; border: 1px solid #30363d; }
-    .result-item { padding: 8px 0; border-bottom: 1px solid #30363d; }
-    .result-item:last-child { border-bottom: none; }
-    .result-item a { color: #58a6ff; text-decoration: none; word-break: break-all; }
-    .result-item a:hover { text-decoration: underline; }
-    .error { color: #f85149; }
-    .success { color: #3fb950; }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      margin-bottom: 12px;
+      padding: 12px 0;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn-secondary {
+      background-color: var(--panel-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border-color);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #results {
+      margin-top: 16px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 12px;
+      background: var(--panel-bg);
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Custom Scrollbar */
+    #results::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #results::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #results::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    #results::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    .result-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .result-item a {
+      color: var(--primary);
+      text-decoration: none;
+      word-break: break-all;
+      font-weight: 500;
+    }
+
+    .result-item a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: var(--danger);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .success {
+      color: var(--success);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
+      color: var(--text-main);
+    }
+
+    .info-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
   </style>
 </head>
+
 <body>
-  <h2>GitHub Secrets Scanner</h2>
-  
+  <h2>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    </svg>
+    Secrets Scanner
+  </h2>
+
   <div id="settings-section" class="hidden">
-    <label>GitHub Personal Access Token:</label>
-    <div style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">Required for global code search or increased limits.</div>
-    <input type="password" id="github-token" placeholder="ghp_...">
-    <button id="save-token" class="btn-secondary">Save Token</button>
-    <button id="close-settings" class="btn-secondary">Close Settings</button>
+    <div class="group">
+      <label>GitHub Personal Access Token (PAT)</label>
+      <div class="info-text"><strong></strong>Required:</strong> GitHub requires authentication to search code. Your token is stored locally on this device.</div>
+      <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    </div>
+    <button id="save-token" class="btn-primary">Save Token</button>
+    <button id="close-settings" class="btn-secondary">Back to Scanner</button>
   </div>
 
   <div id="main-section">
-    <label>Repository URL:</label>
-    <input type="text" id="target-url" placeholder="https://github.com/owner/repo">
-    
-    <button id="scan-repo-btn">Scan Common Secrets in Repo</button>
-    
-    <label>Search Keyword / Pattern:</label>
-    <input type="text" id="search-keyword" placeholder='e.g. AWS_ACCESS_KEY_ID or filename:.env'>
-    <button id="search-repo-btn" class="btn-secondary">Search Keyword in Repo</button>
-    <button id="search-global-btn" class="btn-secondary">Search Keyword Across All Repos</button>
+    <div class="group">
+      <label>Repository URL</label>
+      <input type="text" id="target-url" placeholder="https://github.com/owner/repo">
+    </div>
 
-    <div style="text-align: right; margin-top: 10px;">
-      <a href="#" id="open-settings" style="color:#8b949e; font-size: 12px; text-decoration: none;">⚙️ Token Settings</a>
+    <button id="scan-repo-btn" class="btn-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      Scan Common Secrets
+    </button>
+
+    <div class="group" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
+      <label>Custom Keyword / Pattern</label>
+      <input type="text" id="search-keyword" placeholder="e.g. AWS_ACCESS_KEY_ID">
+    </div>
+
+    <button id="search-repo-btn" class="btn-secondary">Search in Repository</button>
+    <button id="search-global-btn" class="btn-secondary">Global GitHub Search</button>
+
+    <div class="footer">
+      <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">v1.0.0</span>
+      <a href="#" id="open-settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Settings
+      </a>
     </div>
   </div>
 
@@ -58,4 +308,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>
