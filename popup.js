@@ -196,6 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
       `"BEGIN RSA PRIVATE KEY" repo:${repo}`,
       `"PRIVATE_KEY=" repo:${repo}`,
       `"SECRET_KEY=" repo:${repo}`,
+      `"_KEY=" repo:${repo}`,
+      `"_SECRET=" repo:${repo}`,
 
       // Crypto/Web3 Specific (Files)
       `filename:wallet.dat repo:${repo}`,  // Bitcoin Core Wallet
@@ -213,9 +215,26 @@ document.addEventListener('DOMContentLoaded', () => {
       `"WIF" repo:${repo}`,                // Wallet Import Format (Bitcoin)
       `"ETH_PRIVATE_KEY=" repo:${repo}`,
       `"SOLANA_PRIVATE_KEY=" repo:${repo}`,
+      `"POLYGON_PRIVATE_KEY=" repo:${repo}`,
+      `"BSC_PRIVATE_KEY=" repo:${repo}`,
+      `"AVALANCHE_PRIVATE_KEY=" repo:${repo}`,
+      `"ARBITRUM_PRIVATE_KEY=" repo:${repo}`,
+      `"OPTIMISM_PRIVATE_KEY=" repo:${repo}`,
+      `"SUI_PRIVATE_KEY=" repo:${repo}`,
+      `"APTOS_PRIVATE_KEY=" repo:${repo}`,
+      `"NEAR_PRIVATE_KEY=" repo:${repo}`,
+      `"TON_PRIVATE_KEY=" repo:${repo}`,
       `"wallet_private_key" repo:${repo}`,
       `"keystore_password" repo:${repo}`,
       `"PASSPHRASE=" repo:${repo}`,
+
+      // Public Keys / Wallet Addresses
+      `"publicKey" repo:${repo}`,
+      `"public_key" repo:${repo}`,
+      `"walletAddress" repo:${repo}`,
+      `"wallet_address" repo:${repo}`,
+      `"0x" repo:${repo}`,                 // Generic Ethereum/EVM start
+      `"bc1" repo:${repo}`,                // Bitcoin SegWit start
 
       // Web3 Providers & Infrastructure
       `"ALCHEMY_API_KEY=" repo:${repo}`,
@@ -286,11 +305,18 @@ document.addEventListener('DOMContentLoaded', () => {
         /postgres:\/\/[^:]+:[^@]+@/,
         /PRIVATE_KEY\s*=\s*['"]?[a-zA-Z0-9]{32,}['"]?/,
         /SECRET_KEY\s*=\s*['"]?[a-zA-Z0-9]{32,}['"]?/,
+        /[A-Z0-9_]+_KEY\s*=\s*['"]?[a-zA-Z0-9\-\_]{16,}['"]?/, // Any _KEY= variables
+        /[A-Z0-9_]+_SECRET\s*=\s*['"]?[a-zA-Z0-9\-\_]{16,}['"]?/, // Any _SECRET= variables
         /xprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
         /yprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
         /zprv[a-km-zA-HJ-NP-Z1-9]{100,}/,
         /("[a-z]+(\s+[a-z]+){11}")/, // 12-word basic regex
-        /("[a-z]+(\s+[a-z]+){23}")/  // 24-word basic regex
+        /("[a-z]+(\s+[a-z]+){23}")/, // 24-word basic regex
+        // Wallet Addresses / Public Keys
+        /0x[a-fA-F0-9]{40}/, // EVM Addresses (Ethereum, Binance, Polygon, etc.)
+        /bc1[a-zA-HJ-NP-Z0-9]{39,59}/, // Bitcoin Native SegWit
+        /[13][a-km-zA-HJ-NP-Z1-9]{25,34}/, // Bitcoin Legacy / P2SH
+        /(publicKey|wallet|address|pubKey)['"\s]*[:=]['"\s]*[1-9A-HJ-NP-Za-km-z]{32,44}['"]?/i // Solana & Base58 Addresses context-aware
       ];
 
       let foundItems = [];
