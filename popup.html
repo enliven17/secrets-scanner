@@ -365,6 +365,8 @@
         <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off">
       </div>
       <button id="save-token" class="btn-primary">Save Token</button>
+      <button id="clear-ignored-btn" class="btn-secondary"
+        style="margin-bottom: 12px; border-color: var(--danger); color: var(--danger);">Clear Ignored Repos</button>
       <button id="close-settings" class="btn-secondary">Cancel</button>
     </div>
 
@@ -380,9 +382,14 @@
         <input type="checkbox" id="scan-old-commits">
       </div>
 
-      <div class="checkbox-container">
+      <div class="checkbox-container" style="margin-bottom: 12px;">
         <label for="exclude-examples">Exclude Examples & Readmes</label>
         <input type="checkbox" id="exclude-examples" checked>
+      </div>
+
+      <div class="checkbox-container">
+        <label for="only-env-files">Only Search in .env files</label>
+        <input type="checkbox" id="only-env-files">
       </div>
 
       <button id="scan-repo-btn" class="btn-primary">Scan Common Secrets</button>
@@ -390,7 +397,7 @@
       <div class="divider"></div>
 
       <div class="group">
-        <label>Custom Search</label>
+        <label>Custom Search (Uses filters above)</label>
         <input type="text" id="search-keyword" placeholder="e.g. AWS_ACCESS_KEY_ID" autocomplete="off"
           spellcheck="false">
       </div>
@@ -411,6 +418,8 @@
     <div id="results" class="hidden"></div>
   </div>
 
+  <script src="ethers.min.js"></script>
+  <script src="solanaWeb3.min.js"></script>
   <script src="popup.js"></script>
 </body>
 
