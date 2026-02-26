@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const scanRepoBtn = document.getElementById('scan-repo-btn');
   const searchRepoBtn = document.getElementById('search-repo-btn');
   const searchGlobalBtn = document.getElementById('search-global-btn');
+  const checkSecretInput = document.getElementById('check-secret-input');
+  const checkSecretBtn = document.getElementById('check-secret-btn');
   const resultsDiv = document.getElementById('results');
   const scanOldCommitsCheckbox = document.getElementById('scan-old-commits');
   const excludeExamplesCheckbox = document.getElementById('exclude-examples');
@@ -749,6 +751,34 @@ document.addEventListener('DOMContentLoaded', () => {
       displayResults(data.items, data.total_count, `"${keyword}" globally`);
     } catch (e) {
       renderError("Error: " + e.message + " (Global search often requires auth, check Settings)");
+    }
+  });
+
+  checkSecretBtn?.addEventListener('click', async () => {
+    let secretStr = checkSecretInput.value.trim();
+    if (!secretStr) {
+      renderError("Please paste a secret to check.");
+      return;
+    }
+
+    if (secretStr.length < 10) {
+      renderError("Secret must be at least 10 characters long to provide meaningful results.");
+      return;
+    }
+
+    // Force an exact match search
+    let exactSearchQuery = `"${secretStr}"`;
+
+    if (onlyEnvFilesCheckbox && onlyEnvFilesCheckbox.checked) {
+      exactSearchQuery += " filename:.env";
+    }
+
+    showProgress('Scanning globally for this exact string...');
+    try {
+      let data = await githubSearchCode(exactSearchQuery);
+      displayResults(data.items, data.total_count, `Secret Exposure`);
+    } catch (e) {
+      renderError("Check Secret Error: " + e.message + " (Make sure you have a GitHub token in settings)");
     }
   });
 });

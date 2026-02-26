@@ -405,6 +405,20 @@
       <button id="search-repo-btn" class="btn-secondary">Search in Repository</button>
       <button id="search-global-btn" class="btn-secondary">Global Search</button>
 
+      <div class="divider"></div>
+
+      <div class="group">
+        <label style="color: var(--danger);">Am I Exposed?</label>
+        <input type="password" id="check-secret-input" placeholder="Paste secret / API key here" autocomplete="off"
+          spellcheck="false">
+        <p style="font-size: 10px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+          🔒 Your secret is kept safe locally and never leaves your browser. It is directly searched via GitHub's
+          official secure API to see if it has been leaked in any repository worldwide.
+        </p>
+      </div>
+      <button id="check-secret-btn" class="btn-secondary"
+        style="border-color: var(--danger); color: var(--danger);">Scan Global For This Secret</button>
+
       <div class="footer">
         <span>v1.0.0</span>
         <a id="open-settings">Settings</a>
