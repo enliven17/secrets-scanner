@@ -4,19 +4,19 @@
   "version": "1.0",
   "description": "Scans GitHub repositories for exposed .env files and keys.",
   "icons": {
-    "128": "image.png"
+    "128": "assets/image.png"
   },
   "action": {
     "default_title": "Scan Repository",
     "default_icon": {
-      "128": "image.png"
+      "128": "assets/image.png"
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "scripts/background.js"
   },
   "side_panel": {
-    "default_path": "popup.html"
+    "default_path": "views/popup.html"
   },
   "permissions": [
     "activeTab",

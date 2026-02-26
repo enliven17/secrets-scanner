@@ -18,8 +18,8 @@ Since this extension is not published to the Chrome Web Store yet, you can insta
 2. Open Google Chrome and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** using the toggle switch in the top right corner.
 4. Click the **Load unpacked** button in the top left.
-5. Select the folder containing this extension's files (`manifest.json`, `popup.js`, etc.).
-6. The extension is now installed! You can pin it to your toolbar for easy access.
+5. Select the root folder containing this extension's `manifest.json`.
+6. The extension is now installed! You can access it as a Side Panel right from your toolbar.
 
 ## Requirements
 

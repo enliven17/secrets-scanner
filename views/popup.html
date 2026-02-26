@@ -186,17 +186,23 @@
       padding-top: 16px;
     }
 
-    #results::-webkit-scrollbar {
-      width: 6px;
+    /* Minimal Black Scrollbar Design */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
     }
 
-    #results::-webkit-scrollbar-track {
+    ::-webkit-scrollbar-track {
       background: transparent;
     }
 
-    #results::-webkit-scrollbar-thumb {
-      background: var(--border-focus);
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
       border-radius: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
     }
 
     .result-item {
@@ -353,7 +359,7 @@
 <body>
   <div class="container">
     <div class="header-logo">
-      <img src="image.png" alt="Logo">
+      <img src="../assets/image.png" alt="Logo">
       <h2>Secrets Scanner</h2>
     </div>
 
@@ -432,9 +438,9 @@
     <div id="results" class="hidden"></div>
   </div>
 
-  <script src="ethers.min.js"></script>
-  <script src="solanaWeb3.min.js"></script>
-  <script src="popup.js"></script>
+  <script src="../scripts/ethers.min.js"></script>
+  <script src="../scripts/solanaWeb3.min.js"></script>
+  <script src="../scripts/popup.js"></script>
 </body>
 
 </html>
