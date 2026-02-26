@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchGlobalBtn = document.getElementById('search-global-btn');
   const resultsDiv = document.getElementById('results');
   const scanOldCommitsCheckbox = document.getElementById('scan-old-commits');
+  const excludeExamplesCheckbox = document.getElementById('exclude-examples');
 
   const settingsSection = document.getElementById('settings-section');
   const mainSection = document.getElementById('main-section');
@@ -48,25 +49,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function getRepoFromUrl(url) {
+  const filterSection = document.getElementById('filter-section');
+  const filterInput = document.getElementById('filter-input');
+
+  function parseTargetFromUrl(url) {
+    if (!url) return null;
+    let urlStr = url;
+    if (!urlStr.startsWith('http')) {
+      urlStr = 'https://' + urlStr;
+    }
     try {
-      let urlObj = new URL(url);
+      let urlObj = new URL(urlStr);
       if (urlObj.hostname === 'github.com') {
         let parts = urlObj.pathname.split('/').filter(Boolean);
-        if (parts.length >= 2) {
-          return `${parts[0]}/${parts[1]}`;
+        if (parts.length === 1) {
+          return { type: 'user', name: parts[0] };
+        } else if (parts.length >= 2) {
+          return { type: 'repo', name: `${parts[0]}/${parts[1]}` };
         }
       }
-    } catch (e) { }
+    } catch (e) {
+      let parts = url.split('/').filter(Boolean);
+      if (parts.length === 1) return { type: 'user', name: parts[0] };
+      if (parts.length >= 2) return { type: 'repo', name: `${parts[0]}/${parts[1]}` };
+    }
     return null;
   }
 
   function showProgress(msg) {
+    filterSection.classList.add('hidden');
     resultsDiv.classList.remove('hidden');
     resultsDiv.innerHTML = `<span style="color: var(--text-muted);">${msg}</span>`;
   }
 
   function renderError(msg) {
+    filterSection.classList.add('hidden');
     resultsDiv.classList.remove('hidden');
     resultsDiv.innerHTML = `<span class="error">${msg}</span>`;
   }
@@ -103,26 +120,61 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function displayResults(items, totalCount, label) {
+    if (excludeExamplesCheckbox && excludeExamplesCheckbox.checked && items) {
+      let originalLength = items.length;
+      items = items.filter(item => {
+        let name = item.name.toLowerCase();
+        let path = (item.path || '').toLowerCase();
+        let fullKey = name + " " + path;
+
+        // Ignore common illustrative file extensions and readmes
+        if (fullKey.includes('example') ||
+          fullKey.includes('sample') ||
+          fullKey.includes('template') ||
+          fullKey.includes('readme.md') ||
+          fullKey.includes('readme.txt')) {
+          return false;
+        }
+        return true;
+      });
+      totalCount = totalCount - (originalLength - items.length);
+    }
+
     resultsDiv.classList.remove('hidden');
     if (!items || items.length === 0) {
+      filterSection.classList.add('hidden');
       resultsDiv.innerHTML = `<span class="success">No exposures found for ${label}</span>`;
       return;
     }
 
+    filterSection.classList.remove('hidden');
+    filterInput.value = ''; // Reset filter
+
     let html = `<strong style="color: var(--text-main);">Found ${totalCount} results:</strong><br/>`;
-    items.slice(0, 50).forEach(item => {
+    items.forEach(item => {
       html += `
-          <div class="result-item">
+          <div class="result-item" data-text="${(item.name + ' ' + item.repository.full_name).toLowerCase()}">
             File: <a href="${item.html_url}" target="_blank">${item.name}</a><br>
             Repo: <a href="${item.repository.html_url}" target="_blank">${item.repository.full_name}</a>
           </div>
         `;
     });
-    if (items.length > 50) {
-      html += `<div class="result-item">...and more.</div>`
-    }
+
     resultsDiv.innerHTML = html;
   }
+
+  // Live filter event listener
+  filterInput?.addEventListener('input', (e) => {
+    let term = e.target.value.toLowerCase();
+    let resultItems = resultsDiv.querySelectorAll('.result-item');
+    resultItems.forEach(item => {
+      if (item.getAttribute('data-text').includes(term)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
 
   async function fetchRepoCommits(repo) {
     let headers = { 'Accept': 'application/vnd.github.v3+json' };
@@ -156,92 +208,98 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   scanRepoBtn.addEventListener('click', async () => {
-    let repo = getRepoFromUrl(targetUrlInput.value);
-    if (!repo) {
-      renderError("Please enter a valid GitHub repository URL.");
+    let target = parseTargetFromUrl(targetUrlInput.value);
+    if (!target) {
+      renderError("Please enter a valid GitHub repository or user URL.");
       return;
     }
 
+    let searchScope = target.type === 'user' ? `user:${target.name}` : `repo:${target.name}`;
+
     if (scanOldCommitsCheckbox && scanOldCommitsCheckbox.checked) {
-      return scanOldCommitsLogic(repo);
+      if (target.type === 'user') {
+        renderError("Old Commits scanning is only supported for single repositories, not users.");
+        return;
+      }
+      return scanOldCommitsLogic(target.name);
     }
 
     // Predefined queries to look for secrets
     let queries = [
       // Environment & System Configs
-      `filename:.env repo:${repo}`,
-      `filename:id_rsa repo:${repo}`,
-      `filename:id_ed25519 repo:${repo}`,
-      `filename:credentials repo:${repo}`,
-      `filename:wp-config.php repo:${repo}`,
-      `filename:database.yml repo:${repo}`,
-      `"mongodb+srv://" repo:${repo}`,     // MongoDB URLs
-      `"postgres://" repo:${repo}`,        // PostgreSQL URLs
-      `"DATABASE_URL=" repo:${repo}`,      // General DB URL
-      `"DB_PASSWORD=" repo:${repo}`,
+      `filename:.env ${searchScope}`,
+      `filename:id_rsa ${searchScope}`,
+      `filename:id_ed25519 ${searchScope}`,
+      `filename:credentials ${searchScope}`,
+      `filename:wp-config.php ${searchScope}`,
+      `filename:database.yml ${searchScope}`,
+      `"mongodb+srv://" ${searchScope}`,     // MongoDB URLs
+      `"postgres://" ${searchScope}`,        // PostgreSQL URLs
+      `"DATABASE_URL=" ${searchScope}`,      // General DB URL
+      `"DB_PASSWORD=" ${searchScope}`,
 
       // Cloud & SaaS APIs
-      `"AKIA" repo:${repo}`,               // AWS Access Key ID
-      `"sk_live_" repo:${repo}`,           // Stripe Live Secret Key
-      `"ghp_" repo:${repo}`,               // GitHub Personal Access Token
-      `"xoxb-" repo:${repo}`,              // Slack Bot Token
-      `"xoxp-" repo:${repo}`,              // Slack User Token
-      `"NPM_TOKEN=" repo:${repo}`,
-      `"DISCORD_BOT_TOKEN=" repo:${repo}`,
-      `"TELEGRAM_BOT_TOKEN=" repo:${repo}`,
-      `"SENDGRID_API_KEY=" repo:${repo}`,
+      `"AKIA" ${searchScope}`,               // AWS Access Key ID
+      `"sk_live_" ${searchScope}`,           // Stripe Live Secret Key
+      `"ghp_" ${searchScope}`,               // GitHub Personal Access Token
+      `"xoxb-" ${searchScope}`,              // Slack Bot Token
+      `"xoxp-" ${searchScope}`,              // Slack User Token
+      `"NPM_TOKEN=" ${searchScope}`,
+      `"DISCORD_BOT_TOKEN=" ${searchScope}`,
+      `"TELEGRAM_BOT_TOKEN=" ${searchScope}`,
+      `"SENDGRID_API_KEY=" ${searchScope}`,
 
       // Private Key Identifiers
-      `"BEGIN PRIVATE KEY" repo:${repo}`,
-      `"BEGIN RSA PRIVATE KEY" repo:${repo}`,
-      `"PRIVATE_KEY=" repo:${repo}`,
-      `"SECRET_KEY=" repo:${repo}`,
-      `"_KEY=" repo:${repo}`,
-      `"_SECRET=" repo:${repo}`,
+      `"BEGIN PRIVATE KEY" ${searchScope}`,
+      `"BEGIN RSA PRIVATE KEY" ${searchScope}`,
+      `"PRIVATE_KEY=" ${searchScope}`,
+      `"SECRET_KEY=" ${searchScope}`,
+      `"_KEY=" ${searchScope}`,
+      `"_SECRET=" ${searchScope}`,
 
       // Crypto/Web3 Specific (Files)
-      `filename:wallet.dat repo:${repo}`,  // Bitcoin Core Wallet
-      `filename:keystore repo:${repo}`,    // Ethereum Keystore
+      `filename:wallet.dat ${searchScope}`,  // Bitcoin Core Wallet
+      `filename:keystore ${searchScope}`,    // Ethereum Keystore
 
       // Crypto/Web3 Specific (Mnemonics & Keys)
-      `"mnemonic" repo:${repo}`,
-      `"seed phrase" repo:${repo}`,
-      `"bip39" repo:${repo}`,
-      `"12 words" repo:${repo}`,
-      `"24 words" repo:${repo}`,
-      `"xprv" repo:${repo}`,               // Extended Private Key
-      `"yprv" repo:${repo}`,               // BIP49 Extended Private Key
-      `"zprv" repo:${repo}`,               // BIP84 Extended Private Key
-      `"WIF" repo:${repo}`,                // Wallet Import Format (Bitcoin)
-      `"ETH_PRIVATE_KEY=" repo:${repo}`,
-      `"SOLANA_PRIVATE_KEY=" repo:${repo}`,
-      `"POLYGON_PRIVATE_KEY=" repo:${repo}`,
-      `"BSC_PRIVATE_KEY=" repo:${repo}`,
-      `"AVALANCHE_PRIVATE_KEY=" repo:${repo}`,
-      `"ARBITRUM_PRIVATE_KEY=" repo:${repo}`,
-      `"OPTIMISM_PRIVATE_KEY=" repo:${repo}`,
-      `"SUI_PRIVATE_KEY=" repo:${repo}`,
-      `"APTOS_PRIVATE_KEY=" repo:${repo}`,
-      `"NEAR_PRIVATE_KEY=" repo:${repo}`,
-      `"TON_PRIVATE_KEY=" repo:${repo}`,
-      `"wallet_private_key" repo:${repo}`,
-      `"keystore_password" repo:${repo}`,
-      `"PASSPHRASE=" repo:${repo}`,
+      `"mnemonic" ${searchScope}`,
+      `"seed phrase" ${searchScope}`,
+      `"bip39" ${searchScope}`,
+      `"12 words" ${searchScope}`,
+      `"24 words" ${searchScope}`,
+      `"xprv" ${searchScope}`,               // Extended Private Key
+      `"yprv" ${searchScope}`,               // BIP49 Extended Private Key
+      `"zprv" ${searchScope}`,               // BIP84 Extended Private Key
+      `"WIF" ${searchScope}`,                // Wallet Import Format (Bitcoin)
+      `"ETH_PRIVATE_KEY=" ${searchScope}`,
+      `"SOLANA_PRIVATE_KEY=" ${searchScope}`,
+      `"POLYGON_PRIVATE_KEY=" ${searchScope}`,
+      `"BSC_PRIVATE_KEY=" ${searchScope}`,
+      `"AVALANCHE_PRIVATE_KEY=" ${searchScope}`,
+      `"ARBITRUM_PRIVATE_KEY=" ${searchScope}`,
+      `"OPTIMISM_PRIVATE_KEY=" ${searchScope}`,
+      `"SUI_PRIVATE_KEY=" ${searchScope}`,
+      `"APTOS_PRIVATE_KEY=" ${searchScope}`,
+      `"NEAR_PRIVATE_KEY=" ${searchScope}`,
+      `"TON_PRIVATE_KEY=" ${searchScope}`,
+      `"wallet_private_key" ${searchScope}`,
+      `"keystore_password" ${searchScope}`,
+      `"PASSPHRASE=" ${searchScope}`,
 
       // Public Keys / Wallet Addresses
-      `"publicKey" repo:${repo}`,
-      `"public_key" repo:${repo}`,
-      `"walletAddress" repo:${repo}`,
-      `"wallet_address" repo:${repo}`,
-      `"0x" repo:${repo}`,                 // Generic Ethereum/EVM start
-      `"bc1" repo:${repo}`,                // Bitcoin SegWit start
+      `"publicKey" ${searchScope}`,
+      `"public_key" ${searchScope}`,
+      `"walletAddress" ${searchScope}`,
+      `"wallet_address" ${searchScope}`,
+      `"0x" ${searchScope}`,                 // Generic Ethereum/EVM start
+      `"bc1" ${searchScope}`,                // Bitcoin SegWit start
 
       // Web3 Providers & Infrastructure
-      `"ALCHEMY_API_KEY=" repo:${repo}`,
-      `"INFURA_API_KEY=" repo:${repo}`,
-      `"MORALIS_API_KEY=" repo:${repo}`,
-      `"ETHERSCAN_API_KEY=" repo:${repo}`,
-      `"BSCSCAN_API_KEY=" repo:${repo}`
+      `"ALCHEMY_API_KEY=" ${searchScope}`,
+      `"INFURA_API_KEY=" ${searchScope}`,
+      `"MORALIS_API_KEY=" ${searchScope}`,
+      `"ETHERSCAN_API_KEY=" ${searchScope}`,
+      `"BSCSCAN_API_KEY=" ${searchScope}`
     ];
 
     showProgress('Scanning multiple patterns (this might take a few seconds)...');
@@ -363,9 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   searchRepoBtn.addEventListener('click', async () => {
-    let repo = getRepoFromUrl(targetUrlInput.value);
-    if (!repo) {
-      renderError("Please enter a valid GitHub repository URL.");
+    let target = parseTargetFromUrl(targetUrlInput.value);
+    if (!target) {
+      renderError("Please enter a valid GitHub repository or user URL.");
       return;
     }
     let keyword = searchKeywordInput.value.trim();
@@ -374,9 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    showProgress('Searching repository...');
+    showProgress('Searching target...');
+    let searchScope = target.type === 'user' ? `user:${target.name}` : `repo:${target.name}`;
+
     try {
-      let data = await githubSearchCode(`${keyword} repo:${repo}`);
+      let data = await githubSearchCode(`${keyword} ${searchScope}`);
       displayResults(data.items, data.total_count, `"${keyword}"`);
     } catch (e) {
       renderError("Error: " + e.message);

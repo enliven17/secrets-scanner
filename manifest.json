@@ -7,11 +7,13 @@
     "128": "image.png"
   },
   "action": {
-    "default_popup": "popup.html",
     "default_title": "Scan Repository",
     "default_icon": {
       "128": "image.png"
     }
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "side_panel": {
     "default_path": "popup.html"

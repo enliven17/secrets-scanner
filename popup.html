@@ -7,17 +7,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #000000;
-      --bg-hover: #111111;
-      --border: #222222;
-      --border-focus: #444444;
-      --text-main: #eeeeee;
-      --text-muted: #888888;
-      --primary: #ffffff;
-      --primary-text: #000000;
-      --danger: #ff453a;
-      --success: #32d74b;
-      --radius: 6px;
+      --bg: #09090b;
+      --bg-hover: #18181b;
+      --bg-card: #121214;
+      --border: #27272a;
+      --border-focus: #7c3aed;
+      --border-hover: #3f3f46;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --primary-text: #ffffff;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     body {
@@ -25,7 +31,7 @@
       width: 100%;
       min-width: 300px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 0;
       background: var(--bg);
       color: var(--text-main);
       box-sizing: border-box;
@@ -33,86 +39,139 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    .container {
+      padding: 24px;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .header-logo img {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+    }
+
     h2 {
-      margin: 0 0 24px 0;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      color: var(--text-main);
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      background: linear-gradient(90deg, #fff, #a1a1aa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .group {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     label {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
       display: block;
       margin-bottom: 8px;
-      color: var(--text-muted);
+      color: var(--text-main);
     }
 
     input[type="text"],
     input[type="password"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      background: var(--bg);
+      background: var(--bg-card);
       color: var(--text-main);
       font-family: inherit;
-      font-size: 13px;
+      font-size: 14px;
       box-sizing: border-box;
-      transition: border-color 0.2s;
+      transition: all 0.2s ease;
       outline: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
+    }
+
+    input[type="text"]:hover,
+    input[type="password"]:hover {
+      border-color: var(--border-hover);
     }
 
     input[type="text"]:focus,
     input[type="password"]:focus {
       border-color: var(--border-focus);
+      background: var(--bg);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) inset;
     }
 
     input::placeholder {
-      color: #555555;
+      color: #52525b;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid transparent;
       border-radius: var(--radius);
       font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      margin-bottom: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:active {
+      transform: scale(0.98);
     }
 
     .btn-primary {
-      background-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
       color: var(--primary-text);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .btn-primary:hover {
       opacity: 0.9;
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
     }
 
     .btn-secondary {
-      background-color: var(--bg);
+      background-color: var(--bg-card);
       color: var(--text-main);
       border-color: var(--border);
     }
 
     .btn-secondary:hover {
       background-color: var(--bg-hover);
+      border-color: var(--border-hover);
     }
 
     .divider {
       height: 1px;
-      background: var(--border);
-      margin: 24px 0 20px 0;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 28px 0;
     }
 
     .hidden {
@@ -121,15 +180,14 @@
 
     #results {
       margin-top: 16px;
-      max-height: 200px;
+      max-height: 400px;
       overflow-y: auto;
-      font-size: 12px;
+      font-size: 13px;
       padding-top: 16px;
-      border-top: 1px solid var(--border);
     }
 
     #results::-webkit-scrollbar {
-      width: 4px;
+      width: 6px;
     }
 
     #results::-webkit-scrollbar-track {
@@ -137,57 +195,78 @@
     }
 
     #results::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 4px;
+      background: var(--border-focus);
+      border-radius: 6px;
     }
 
     .result-item {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      line-height: 1.5;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      line-height: 1.6;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      animation: slideIn 0.3s forwards;
+      opacity: 0;
+      transform: translateY(10px);
     }
 
-    .result-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
+    .result-item:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-2px);
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .result-item a {
       color: var(--text-main);
       text-decoration: underline;
-      text-decoration-color: #444;
-      text-underline-offset: 3px;
+      text-decoration-color: #555;
+      text-underline-offset: 4px;
       word-break: break-all;
+      font-weight: 500;
     }
 
     .result-item a:hover {
-      text-decoration-color: var(--text-main);
+      text-decoration-color: var(--primary);
+      color: var(--primary);
     }
 
-    .repo-link {
-      color: var(--text-muted) !important;
-      text-decoration: none !important;
-    }
-
-    .repo-link:hover {
-      color: var(--text-main) !important;
+    .error,
+    .success {
+      display: block;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-weight: 500;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
     }
 
     .error {
       color: var(--danger);
-      font-weight: 500;
+      background: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     .success {
       color: var(--success);
-      font-weight: 500;
+      background: var(--success-bg);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
     .footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 24px;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
     }
 
     .footer a,
@@ -204,59 +283,133 @@
     }
 
     .info-text {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
       margin-bottom: 16px;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    /* Checkbox Styling */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.2s;
+    }
+
+    .checkbox-container:hover {
+      border-color: var(--border-hover);
+    }
+
+    .checkbox-container label {
+      margin: 0;
+      cursor: pointer;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      background-color: var(--bg);
+      margin: 0;
+      font: inherit;
+      color: currentColor;
+      width: 1.15em;
+      height: 1.15em;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: grid;
+      place-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    input[type="checkbox"]::before {
+      content: "";
+      width: 0.65em;
+      height: 0.65em;
+      transform: scale(0);
+      transition: 120ms transform ease-in-out;
+      box-shadow: inset 1em 1em var(--primary);
+      transform-origin: bottom left;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    }
+
+    input[type="checkbox"]:checked {
+      border-color: var(--primary);
+    }
+
+    input[type="checkbox"]:checked::before {
+      transform: scale(1);
     }
   </style>
 </head>
 
 <body>
-  <h2>Secrets Scanner</h2>
-
-  <div id="settings-section" class="hidden">
-    <div class="group">
-      <label>Personal Access Token</label>
-      <div class="info-text">GitHub requires authentication for code search. Your token is stored locally on this
-        device.</div>
-      <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off">
+  <div class="container">
+    <div class="header-logo">
+      <img src="image.png" alt="Logo">
+      <h2>Secrets Scanner</h2>
     </div>
-    <button id="save-token" class="btn-primary">Save Token</button>
-    <button id="close-settings" class="btn-secondary">Cancel</button>
+
+    <div id="settings-section" class="hidden">
+      <div class="group">
+        <label>Personal Access Token</label>
+        <div class="info-text">GitHub requires authentication for code search. Your token is stored locally on this
+          device.</div>
+        <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off">
+      </div>
+      <button id="save-token" class="btn-primary">Save Token</button>
+      <button id="close-settings" class="btn-secondary">Cancel</button>
+    </div>
+
+    <div id="main-section">
+      <div class="group">
+        <label>Repository or User URL</label>
+        <input type="text" id="target-url" placeholder="github.com/owner/repo or github.com/user" autocomplete="off"
+          spellcheck="false">
+      </div>
+
+      <div class="checkbox-container" style="margin-bottom: 12px;">
+        <label for="scan-old-commits">Scan Old Commits (Last 100)</label>
+        <input type="checkbox" id="scan-old-commits">
+      </div>
+
+      <div class="checkbox-container">
+        <label for="exclude-examples">Exclude Examples & Readmes</label>
+        <input type="checkbox" id="exclude-examples" checked>
+      </div>
+
+      <button id="scan-repo-btn" class="btn-primary">Scan Common Secrets</button>
+
+      <div class="divider"></div>
+
+      <div class="group">
+        <label>Custom Search</label>
+        <input type="text" id="search-keyword" placeholder="e.g. AWS_ACCESS_KEY_ID" autocomplete="off"
+          spellcheck="false">
+      </div>
+
+      <button id="search-repo-btn" class="btn-secondary">Search in Repository</button>
+      <button id="search-global-btn" class="btn-secondary">Global Search</button>
+
+      <div class="footer">
+        <span>v1.0.0</span>
+        <a id="open-settings">Settings</a>
+      </div>
+    </div>
+
+    <div id="filter-section" class="hidden" style="margin-top: 16px;">
+      <input type="text" id="filter-input" placeholder="Type to filter results..." autocomplete="off">
+    </div>
+
+    <div id="results" class="hidden"></div>
   </div>
-
-  <div id="main-section">
-    <div class="group">
-      <label>Repository URL</label>
-      <input type="text" id="target-url" placeholder="github.com/owner/repo" autocomplete="off" spellcheck="false">
-    </div>
-
-    <div class="group" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-      <label for="scan-old-commits" style="margin: 0; cursor: pointer; color: var(--text-main);">Scan Old Commits (Last
-        100)</label>
-      <input type="checkbox" id="scan-old-commits" style="margin: 0; cursor: pointer; width: 16px; height: 16px;">
-    </div>
-
-    <button id="scan-repo-btn" class="btn-primary">Scan Common Secrets</button>
-
-    <div class="divider"></div>
-
-    <div class="group">
-      <label>Custom Search</label>
-      <input type="text" id="search-keyword" placeholder="e.g. AWS_ACCESS_KEY_ID" autocomplete="off" spellcheck="false">
-    </div>
-
-    <button id="search-repo-btn" class="btn-secondary">Search in Repository</button>
-    <button id="search-global-btn" class="btn-secondary">Global Search</button>
-
-    <div class="footer">
-      <span>v1.0.0</span>
-      <a id="open-settings">Settings</a>
-    </div>
-  </div>
-
-  <div id="results" class="hidden"></div>
 
   <script src="popup.js"></script>
 </body>
